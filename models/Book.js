@@ -17,7 +17,7 @@ const BookSchema = new Schema(
   }
 );
 
-BookSchema.virtuals("commentcount").get(function () {
+BookSchema.virtual("commentcount").get(function () {
   return this.comments.length();
 });
 
