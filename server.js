@@ -37,12 +37,15 @@ app.use(function (req, res, next) {
 
 //Connect to database
 mongoose
-  .connect(process.env.DB, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false,
-    useCreateIndex: true,
-  })
+  .connect(
+    process.env.NODE_ENV === "test" ? process.env.DB_TEST : process.env.DB,
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false,
+      useCreateIndex: true,
+    }
+  )
   .then(() => {
     console.log("Connected to database");
 

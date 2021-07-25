@@ -9,11 +9,15 @@
 const chaiHttp = require("chai-http");
 const chai = require("chai");
 const assert = chai.assert;
+
 const server = require("../server");
+const Book = require("../models/Book");
 
 chai.use(chaiHttp);
 
 suite("Functional Tests", function () {
+  setup(async () => await Book.deleteMany());
+
   /*
    * ----[EXAMPLE TEST]----
    * Each test should completely test the response of the API end-point including response status code!
@@ -52,11 +56,39 @@ suite("Functional Tests", function () {
       "POST /api/books with title => create book object/expect book object",
       function () {
         test("Test POST /api/books with title", function (done) {
-          //done();
+          chai
+            .request(server)
+            .post("/api/books")
+            .send({ title: "Book 1" })
+            .end((err, res) => {
+              assert.equal(res.status, 201, "Must return 201 status");
+              assert.isObject(res.body, "Must return the book");
+              assert.equal(
+                res.body.title,
+                "Book 1",
+                "Must return the created book"
+              );
+
+              done();
+            });
         });
 
         test("Test POST /api/books with no title given", function (done) {
-          //done();
+          chai
+            .request(server)
+            .post("/api/books")
+            .send({ title: "" })
+            .end((err, res) => {
+              assert.equal(res.status, 409, "Must return 400 status");
+              assert.isString(res.body, "Must return a string");
+              assert.equal(
+                res.body,
+                "missing required field title",
+                "Must return a proper error message"
+              );
+
+              done();
+            });
         });
       }
     );
