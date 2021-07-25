@@ -22,16 +22,19 @@ module.exports = function (app) {
       let title = req.body.title;
 
       if (!title) {
-        return res
-          .status(400)
-          .type("text")
-          .send("missing required field title");
+        return (
+          res
+            // .status(400)
+            .type("text")
+            .send("missing required field title")
+        );
       }
 
       const book = await Book.create({ title });
 
       //response will contain new book object including atleast _id and title
-      res.status(201).json(book);
+      // res.status(201).json(book);
+      res.json(book);
     })
 
     .delete(function (req, res) {
