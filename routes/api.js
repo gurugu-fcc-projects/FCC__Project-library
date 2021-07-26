@@ -13,9 +13,21 @@ const Book = require("../models/Book");
 module.exports = function (app) {
   app
     .route("/api/books")
-    .get(function (req, res) {
-      //response will be array of book objects
-      //json res format: [{"_id": bookid, "title": book_title, "commentcount": num_of_comments },...]
+    .get(async (req, res) => {
+      console.log("getting books...");
+
+      try {
+        const books = await Book.aggregate()
+          .addFields({ commentcount: { $size: "$comments" } })
+          .project("-comments")
+          .exec();
+
+        //response will be array of book objects
+        //json res format: [{"_id": bookid, "title": book_title, "commentcount": num_of_comments },...]
+        res.json(books);
+      } catch (err) {
+        console.log(err);
+      }
     })
 
     .post(async (req, res) => {

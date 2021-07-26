@@ -15,7 +15,7 @@ const Book = require("../models/Book");
 
 chai.use(chaiHttp);
 
-suite("Functional Tests", function () {
+suite("Functional Tests", () => {
   setup(async () => await Book.deleteMany());
 
   /*
@@ -51,11 +51,11 @@ suite("Functional Tests", function () {
    * ----[END of EXAMPLE TEST]----
    */
 
-  suite("Routing tests", function () {
+  suite("Routing tests", () => {
     suite(
       "POST /api/books with title => create book object/expect book object",
-      function () {
-        test("Test POST /api/books with title", function (done) {
+      () => {
+        test("Test POST /api/books with title", done => {
           chai
             .request(server)
             .post("/api/books")
@@ -73,7 +73,7 @@ suite("Functional Tests", function () {
             });
         });
 
-        test("Test POST /api/books with no title given", function (done) {
+        test("Test POST /api/books with no title given", done => {
           chai
             .request(server)
             .post("/api/books")
@@ -93,9 +93,38 @@ suite("Functional Tests", function () {
       }
     );
 
-    suite.skip("GET /api/books => array of books", function () {
-      test("Test GET /api/books", function (done) {
-        //done();
+    suite("GET /api/books => array of books", () => {
+      test("Test GET /api/books", done => {
+        const requester = chai.request(server).keepOpen();
+        const data = ["The Hobbit", "Harry Potter", "Lord of the Rings"];
+
+        Promise.all([
+          requester.post("/api/books").send({ title: data[0] }),
+          requester.post("/api/books").send({ title: data[1] }),
+          requester.post("/api/books").send({ title: data[2] }),
+        ])
+          .then(responses => {
+            chai
+              .request(server)
+              .get("/api/books")
+              .end((err, res) => {
+                assert.isArray(res.body);
+                assert.lengthOf(res.body, 3);
+
+                res.body.forEach(book => {
+                  assert.isObject(book);
+                  assert.property(book, "title");
+                  assert.isTrue(data.includes(book.title));
+                  assert.property(book, "commentcount");
+                  assert.isNumber(book.commentcount);
+                  assert.property(book, "_id");
+                });
+
+                done();
+              });
+          })
+          .then(() => requester.close())
+          .catch(err => console.log(err));
       });
     });
 
