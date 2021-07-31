@@ -14,8 +14,6 @@ module.exports = function (app) {
   app
     .route("/api/books")
     .get(async (req, res) => {
-      console.log("getting books...");
-
       try {
         const books = await Book.aggregate()
           .addFields({ commentcount: { $size: "$comments" } })
@@ -55,9 +53,21 @@ module.exports = function (app) {
 
   app
     .route("/api/books/:id")
-    .get(function (req, res) {
-      let bookid = req.params.id;
-      //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
+    .get(async (req, res) => {
+      try {
+        let bookid = req.params.id;
+
+        const book = await Book.findById(bookid).exec();
+
+        if (!book) {
+          return res.type("text").send("no book exists");
+        }
+
+        //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
+        res.status(200).json(book);
+      } catch (err) {
+        console.log(err.message);
+      }
     })
 
     .post(function (req, res) {

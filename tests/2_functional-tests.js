@@ -128,13 +128,44 @@ suite("Functional Tests", () => {
       });
     });
 
-    suite.skip("GET /api/books/[id] => book object with [id]", function () {
-      test("Test GET /api/books/[id] with id not in db", function (done) {
-        //done();
+    suite("GET /api/books/[id] => book object with [id]", () => {
+      test.skip("Test GET /api/books/[id] with id not in db", done => {
+        chai
+          .request(server)
+          .get("/api/books/5f665eb46e296f6b9b6a504d")
+          .end((err, res) => {
+            assert.isString(res.text, "Must return a string");
+            assert.equal(
+              res.text,
+              "no book exists",
+              "Must return a proper error message"
+            );
+
+            done();
+          });
       });
 
-      test("Test GET /api/books/[id] with valid id in db", function (done) {
-        //done();
+      test("Test GET /api/books/[id] with valid id in db", done => {
+        chai
+          .request(server)
+          .post("/api/books")
+          .send({ title: "Space Troopers" })
+          .end((err, res) => {
+            const bookId = res.body._id;
+
+            chai
+              .request(server)
+              .get(`/api/books/${bookId}`)
+              .end((err, res) => {
+                console.log(res.body);
+                assert.isObject(res.body);
+                assert.property(res.body, "title");
+                assert.equal(res.body.title, "Space Troopers");
+                assert.property(res.body, "comments");
+                assert.isArray(res.body.comments);
+                done();
+              });
+          });
       });
     });
 
