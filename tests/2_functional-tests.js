@@ -275,5 +275,34 @@ suite("Functional Tests", () => {
           });
       });
     });
+
+    suite("DELETE /api/books => delete all books in the database", () => {
+      test("Test DELETE /api/books", done => {
+        const requester = chai.request(server).keepOpen();
+        const data = ["The Hobbit", "Harry Potter", "Lord of the Rings"];
+
+        Promise.all([
+          requester.post("/api/books").send({ title: data[0] }),
+          requester.post("/api/books").send({ title: data[1] }),
+          requester.post("/api/books").send({ title: data[2] }),
+        ])
+          .then(responses => {
+            chai
+              .request(server)
+              .delete("/api/books")
+              .end((err, res) => {
+                assert.isString(res.text, "Must return a string");
+                assert.equal(
+                  res.text,
+                  "complete delete successful",
+                  "Must return a proper success message"
+                );
+                done();
+              });
+          })
+          .then(() => requester.close())
+          .catch(err => console.log(err));
+      });
+    });
   });
 });
