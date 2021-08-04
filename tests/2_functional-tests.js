@@ -235,13 +235,43 @@ suite("Functional Tests", () => {
       }
     );
 
-    suite.skip("DELETE /api/books/[id] => delete book object id", function () {
-      test("Test DELETE /api/books/[id] with valid id in db", function (done) {
-        //done();
+    suite("DELETE /api/books/[id] => delete book object id", () => {
+      test("Test DELETE /api/books/[id] with valid id in db", done => {
+        chai
+          .request(server)
+          .post("/api/books")
+          .send({ title: "Fight Club 2" })
+          .end((err, res) => {
+            const bookId = res.body._id;
+
+            chai
+              .request(server)
+              .delete(`/api/books/${bookId}`)
+              .end((err, res) => {
+                assert.isString(res.text, "Must return a string");
+                assert.equal(
+                  res.text,
+                  "delete successful",
+                  "Must return a proper success message"
+                );
+                done();
+              });
+          });
       });
 
-      test("Test DELETE /api/books/[id] with  id not in db", function (done) {
-        //done();
+      test("Test DELETE /api/books/[id] with  id not in db", done => {
+        chai
+          .request(server)
+          .delete("/api/books/5f665eb46e296f6b9b6a504d")
+          .end((err, res) => {
+            assert.isString(res.text, "Must return a string");
+            assert.equal(
+              res.text,
+              "no book exists",
+              "Must return a proper error message"
+            );
+            done();
+          });
       });
     });
   });
