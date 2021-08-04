@@ -222,6 +222,7 @@ suite("Functional Tests", () => {
           chai
             .request(server)
             .post("/api/books/5f665eb46e296f6b9b6a504d")
+            .send({ comment: "Life changing!" })
             .end((err, res) => {
               assert.isString(res.text, "Must return a string");
               assert.equal(

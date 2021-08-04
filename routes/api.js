@@ -75,12 +75,6 @@ module.exports = function (app) {
       let comment = req.body.comment;
 
       try {
-        const book = await Book.findById(bookid);
-
-        if (!book) {
-          return res.type("text").send("no book exists");
-        }
-
         if (!comment) {
           return res.type("text").send("missing required field comment");
         }
@@ -90,6 +84,10 @@ module.exports = function (app) {
           { $push: { comments: comment } },
           { new: true }
         );
+
+        if (!updatedBook) {
+          return res.type("text").send("no book exists");
+        }
 
         //json res format same as .get
         res.json(updatedBook);
