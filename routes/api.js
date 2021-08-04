@@ -70,10 +70,32 @@ module.exports = function (app) {
       }
     })
 
-    .post(function (req, res) {
+    .post(async (req, res) => {
       let bookid = req.params.id;
       let comment = req.body.comment;
-      //json res format same as .get
+
+      try {
+        const book = await Book.findById(bookid);
+
+        if (!book) {
+          return res.type("text").send("no book exists");
+        }
+
+        if (!comment) {
+          return res.type("text").send("missing required field comment");
+        }
+
+        const updatedBook = await Book.findByIdAndUpdate(
+          bookid,
+          { $push: { comments: comment } },
+          { new: true }
+        );
+
+        //json res format same as .get
+        res.json(updatedBook);
+      } catch (err) {
+        console.log(err.message);
+      }
     })
 
     .delete(function (req, res) {

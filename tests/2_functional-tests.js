@@ -171,44 +171,50 @@ suite("Functional Tests", () => {
     suite(
       "POST /api/books/[id] => add comment/expect book object with id",
       () => {
-        let bookId = null;
-
-        suiteSetup(() => {
+        test("Test POST /api/books/[id] with comment", done => {
           chai
             .request(server)
             .post("/api/books")
             .send({ title: "Fight Club" })
-            .end((err, res) => (bookId = res.body._id));
-        });
-
-        test("Test POST /api/books/[id] with comment", done => {
-          chai
-            .request(server)
-            .post(`/api/books/${bookId}`)
-            .send({ comment: "Life changing!" })
             .end((err, res) => {
-              assert.isObject(res.body);
-              assert.property(res.body, "title");
-              assert.equal(res.body.title, "Fight Club");
-              assert.property(res.body, "comments");
-              assert.isArray(res.body.comments);
-              assert.equal(res.body.comments[0], "Life changing!");
-              done();
+              const bookId = res.body._id;
+
+              chai
+                .request(server)
+                .post(`/api/books/${bookId}`)
+                .send({ comment: "Life changing!" })
+                .end((err, res) => {
+                  assert.isObject(res.body);
+                  assert.property(res.body, "title");
+                  assert.equal(res.body.title, "Fight Club");
+                  assert.property(res.body, "comments");
+                  assert.isArray(res.body.comments);
+                  assert.equal(res.body.comments[0], "Life changing!");
+                  done();
+                });
             });
         });
 
         test("Test POST /api/books/[id] without comment field", done => {
           chai
             .request(server)
-            .post(`/api/books/${bookId}`)
+            .post("/api/books")
+            .send({ title: "Fight Club" })
             .end((err, res) => {
-              assert.isString(res.text, "Must return a string");
-              assert.equal(
-                res.text,
-                "missing required field comment",
-                "Must return a proper error message"
-              );
-              done();
+              const bookId = res.body._id;
+
+              chai
+                .request(server)
+                .post(`/api/books/${bookId}`)
+                .end((err, res) => {
+                  assert.isString(res.text, "Must return a string");
+                  assert.equal(
+                    res.text,
+                    "missing required field comment",
+                    "Must return a proper error message"
+                  );
+                  done();
+                });
             });
         });
 
@@ -229,7 +235,7 @@ suite("Functional Tests", () => {
       }
     );
 
-    suite("DELETE /api/books/[id] => delete book object id", function () {
+    suite.skip("DELETE /api/books/[id] => delete book object id", function () {
       test("Test DELETE /api/books/[id] with valid id in db", function (done) {
         //done();
       });
